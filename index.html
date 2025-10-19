@@ -1,0 +1,418 @@
+<!doctype html>
+<html>
+<head>
+    <link rel="shortcut icon" href="img/head.ico" type="image/x-icon">
+    <meta charset="utf-8">
+    <title>Chinese Postman Problem Solution - Group 12</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #ff69b4;
+            --secondary-color: #ffb6c1;
+            --background-gradient: linear-gradient(135deg, #fff0f5 0%, #ffb6c1 100%);
+        }
+
+        body {
+            background-color: #fff0f5;
+            background-image: var(--background-gradient);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+            width: 100%;
+            margin: 0;
+            padding: 10px;
+        }
+        
+        /* Sticky notes background */
+        .sticky-note {
+            position: fixed;
+            width: 150px;
+            height: 150px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 2px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            transform: rotate(var(--rotate));
+            z-index: -1;
+            animation: float 15s infinite ease-in-out;
+            opacity: 0.6;
+            transition: transform 0.3s ease;
+        }
+        
+        .sticky-note:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            border-width: 20px;
+            border-style: solid;
+            border-color: #f8f8f8 #f8f8f8 rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.5);
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .sticky-note:hover {
+            transform: scale(1.05) rotate(var(--rotate));
+            opacity: 0.8;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(var(--rotate)); }
+            50% { transform: translateY(-15px) rotate(var(--rotate)); }
+        }
+        
+        .sticky-pink { background-color: rgba(255, 182, 193, 0.5); }
+        .sticky-blue { background-color: rgba(173, 216, 230, 0.5); }
+        .sticky-yellow { background-color: rgba(255, 255, 173, 0.5); }
+        .sticky-green { background-color: rgba(152, 251, 152, 0.5); }
+        .sticky-purple { background-color: rgba(221, 160, 221, 0.5); }
+        
+        /* Floating hearts animation */
+        .heart {
+            position: fixed;
+            font-size: 20px;
+            color: rgba(255, 105, 180, 0.6);
+            z-index: -1;
+            animation: floatHeart 15s infinite linear;
+            user-select: none;
+            pointer-events: none;
+        }
+        
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(100vh) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .heart.animated {
+            animation: floatHeart 15s infinite linear, heartbeat 1s infinite ease-in-out;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(255, 105, 180, 0.2);
+            padding: 20px;
+            animation: fadeIn 1s ease-in-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #header {
+            padding: 30px 0;
+            color: #ff69b4;
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: pulse 3s infinite ease-in-out;
+            background: linear-gradient(45deg, #ff1493, #ff69b4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.15);
+            width: 100%;
+            padding: 20px;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(255, 105, 180, 0.3);
+        }
+
+        .card-title {
+            font-size: 24px;
+            color: #ff69b4;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+.card-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #ffb6c1;
+    margin: 0 auto 15px;
+    transition: transform 0.3s ease;
+    animation: rotate 30s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg) scale(1); }
+    to { transform: rotate(360deg) scale(1); } /* maintain scale(1) during rotation */
+}
+
+.card:hover .card-image {
+    animation: rotate-scale 30s linear infinite;
+}
+
+/* New keyframe with scale on hover */
+@keyframes rotate-scale {
+    from { transform: rotate(0deg) scale(1.1); }
+    to { transform: rotate(360deg) scale(1.1); }
+}
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+            margin: 15px auto;
+        }
+
+        .button {
+            display: block;
+            background: linear-gradient(45deg, #ff69b4, #ffb6c1);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.4);
+            background: linear-gradient(45deg, #ff1493, #ff69b4);
+            animation: pulse 1s infinite ease-in-out;
+        }
+
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .button:hover::before {
+            left: 100%;
+        }
+
+        @media screen and (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+            
+            #header {
+                font-size: 28px;
+                padding: 20px 0;
+            }
+            
+            .card-image {
+                width: 120px;
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sticky notes background elements -->
+    <div class="sticky-note sticky-pink" style="--rotate: 5deg; top: 10%; left: 5%;"></div>
+    <div class="sticky-note sticky-blue" style="--rotate: -7deg; top: 25%; left: 85%;"></div>
+    <div class="sticky-note sticky-yellow" style="--rotate: 3deg; top: 70%; left: 10%;"></div>
+    <div class="sticky-note sticky-green" style="--rotate: -5deg; top: 60%; left: 90%;"></div>
+    <div class="sticky-note sticky-purple" style="--rotate: 8deg; top: 40%; left: 3%;"></div>
+    <div class="sticky-note sticky-pink" style="--rotate: -10deg; top: 80%; left: 80%;"></div>
+    <div class="sticky-note sticky-blue" style="--rotate: 6deg; top: 15%; left: 75%;"></div>
+    <div class="sticky-note sticky-yellow" style="--rotate: -8deg; top: 65%; left: 30%;"></div>
+    
+    <!-- Floating hearts -->
+    <div id="hearts-container"></div>
+
+    <div class="container">
+        <div id="header">Chinese Postman Problem Solver</div>
+        
+        <div class="content">
+            <div class="card">
+                <img src="img/postman.png" class="card-image" alt="Graph Theory"/>
+                <div class="card-title">Graph Theory</div>
+                <div class="button-container">
+                    <a href="Graphs/undirected-graph.html" target="_blank" class="button">Undirected Graphs</a>
+                    <a href="Graphs/directed-graph.html" target="_blank" class="button">Directed Graphs</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Document ready function
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize sticky notes effects
+            const stickyNotes = document.querySelectorAll('.sticky-note');
+            
+            // Random movement for sticky notes
+            stickyNotes.forEach(note => {
+                // Set random animation duration for each note
+                const duration = 10 + Math.random() * 15;
+                note.style.animationDuration = `${duration}s`;
+                
+                // Add random delay to each animation
+                const delay = Math.random() * 5;
+                note.style.animationDelay = `${delay}s`;
+                
+                // Add mouseover effect
+                note.addEventListener('mouseover', function() {
+                    this.style.zIndex = "0";
+                });
+                
+                note.addEventListener('mouseout', function() {
+                    this.style.zIndex = "-1";
+                });
+            });
+            
+            // Add animation to buttons on hover
+            const buttons = document.querySelectorAll('.button');
+            buttons.forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.animation = 'pulse 0.5s infinite alternate';
+                });
+                
+                btn.addEventListener('mouseleave', function() {
+                    this.style.animation = '';
+                });
+            });
+            
+            // Create floating hearts
+            createFloatingHearts();
+        });
+        
+        // Function to create floating hearts
+        function createFloatingHearts() {
+            const heartsContainer = document.getElementById('hearts-container');
+            const heartSymbols = ['❤️', '💕', '💓', '💗', '💖', '💘', '💝'];
+            const containerWidth = window.innerWidth;
+            
+            // Create initial set of hearts
+            for (let i = 0; i < 15; i++) {
+                createHeart(heartsContainer, heartSymbols, containerWidth);
+            }
+            
+            // Continue creating hearts periodically
+            setInterval(() => {
+                createHeart(heartsContainer, heartSymbols, containerWidth);
+            }, 2000);
+        }
+        
+        // Create a single heart element with random properties
+        function createHeart(container, symbols, maxWidth) {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            
+            // Randomly choose heart symbol
+            const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+            heart.innerHTML = symbol;
+            
+            // Random size (increase for more variation)
+            const size = 12 + Math.random() * 25;
+            heart.style.fontSize = `${size}px`;
+            
+            // Random horizontal position
+            const left = Math.random() * maxWidth;
+            heart.style.left = `${left}px`;
+            
+            // Random animation duration
+            const duration = 10 + Math.random() * 20;
+            heart.style.animationDuration = `${duration}s`;
+            
+            // Random delay
+            const delay = Math.random() * 10;
+            heart.style.animationDelay = `-${delay}s`;
+            
+            // Random opacity
+            const opacity = 0.3 + Math.random() * 0.7;
+            heart.style.opacity = opacity;
+            
+            // Occasionally make heart beat
+            if (Math.random() > 0.7) {
+                heart.classList.add('animated');
+            }
+            
+            // Add to container
+            container.appendChild(heart);
+            
+            // Remove heart after animation completes
+            setTimeout(() => {
+                if (heart && heart.parentNode) {
+                    heart.parentNode.removeChild(heart);
+                }
+            }, duration * 1000);
+        }
+    </script>
+</body>
+</html>
